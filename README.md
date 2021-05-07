@@ -1,3 +1,4 @@
-Complex Requirements in Automata Learning=====================
+Complex Requirements in Automata Learning
+=====================
 
 TODO fill in the details
