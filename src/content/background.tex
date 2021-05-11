@@ -24,7 +24,7 @@ For a model to be interpretable, executable or formally verifiable, it must be d
 	\end{itemize}
 \end{definition}
 
-Models can grasp various aspects of a system. Structural models describe the structure of the system, representing knowledge regarding the parts of the system and the properties and connections of these parts. This means that the model describes static knowledge and not temporal change. On the other hand, behavioral models describe the change of the system over time through its changing of states and execution of processes. These categories do not cover every aspect of a system, and usually cannot be separated this well in practical applications. For instance, action languages of state-based models describe the behavior of the system in a procedural way. There are several possible formalisms for both kinds of models, some of which are discussed in Section \ref{sec_backgrmodeling}.
+Models can grasp various aspects of a system. Structural models describe the structure of the system, representing knowledge regarding the parts of the system and the properties and connections of these parts. This means that the model describes static knowledge and not temporal change. On the other hand, behavioral models describe the change of the system over time through its changing of states and execution of processes. These categories do not cover every aspect of a system, and usually cannot be separated this well in practical applications. For instance, action languages of state-based models describe the behavior of the system in a procedural way. There are several possible formalisms for both kinds of models, some of which are discussed in Section %TODO%\ref{sec_backgrmodeling}.
 
 The process of deriving design artifacts is called \textit{model transformation}.
 \begin{definition}[Model Transformation]
@@ -97,7 +97,7 @@ Especially in case of describing the behavior of reactive systems (or non-termin
 
 Formal language theory is closely linked with automata theory, which we will introduce in the following subsection.
 
-\subsection{Finite Automata and $\omega$-automata}
+\subsection{Finite Automata and $\omega$-automata} \label{ss:automata}
 
 Informally, automata are mathematical constructs which read characters from an input and classify them into "accepted" and "rejected" categories. A bit more precisely, automata consist of states, some of which are accepting states. Starting from an initial state, based on the inputs received, the automaton transitions between states. If after processing a sequence of inputs, the final state of the automaton is an accepting state, the input sequence is accepted. If not, the input is rejected.
 
@@ -600,13 +600,280 @@ The $L^*_M$ algorithm is more refined implementation of automata learning than t
 PLACEHOLDER
 
 \section{Specifying Complex Requirements}
-TODO TODO TODO
+The previous sections introduced different modeling types and techniques. We now discuss the requirements used in model-based engineering which the models need to satisfy.
 
-\subsection{Requirements}
-TODO
+\subsection{Requirements and Properties}
+Throughout this thesis, the concept of requirements is used widely, therefore, it is essential to define it precisely. 
+
+\begin{definition}[Requirement\cite{sweterminology}]
+	\mbox{}
+	\begin{enumerate}
+		\setlength\itemsep{0.1em}
+		\item A condition or capability needed by the user to solve a problem or achieve an objective.
+		\item A condition or capability that must be met or possessed by a system component to satisfy a contract, standard, specification or other formally imposed documents.
+		\item A documented representation of a condition or capability as in (1) or (2).
+	\end{enumerate}
+\end{definition}
+
+Basically, requirements are properties of the system, which the system must satisfy. They can be specified in many different ways, the most common being textual requirements in traditional feature lists. This method is an informal way of requirements specification, as the structure of this format is hard to analyze due to it lacking a precise definition. Attempts were made to formalize this type of requirements by defining patterns and mapping the individual patterns to formal semantics, however, there are also more abstract approaches, such as \textit{temporal logics}.
+
+The rationale behind the precise formalization is the wide range of automated applications, especially in \textit{formal methods} -- such as validation, formal verification, test oracle generation and requirement documentation generation. The rest of this subsection defines basic concepts concerning properties.
+
+\begin{definition}[Linear-Time Property]
+	\label{def:ltproperty}
+	A linear-time property (LT property) $P$ over the set of atomic propositions $AP$ is defined as $P \subseteq (2^{AP})^\omega$
+	
+	An LT property is thus an $\omega$-language over the alphabet $2^{AP}$.
+\end{definition}
+
+LT properties can be used to describe restictions on the traces of transition systems, such as LTSs (introduced in Subsection \ref{ss:automata}) or Kripke-structures \cite{Kripke1963-KRISCO}.
+
+%TODO define trace for LTS?
+\begin{definition}[Satisfaction of LT Properties]
+	\label{def:ltsatisfaction}
+	Let $TS = (S, Act, \rightarrow)$ be a (labeled) transition system, $AP = Act$ the set of atomic propositions and $P$ an LT property over $AP$. $TS$ satisfies $P$ -- denoted $TS \vDash P$ -- iff $Traces(TS) \subseteq P$.
+	
+	This means, that a transition system $TS$ satisfies the LT property $P$, if all its traces respect $P$.
+\end{definition}
+
+\begin{example}
+	\label{ex:ltpropexample}
+	Figure \ref{fig:ltpropexample} depicts a system of two fully synchronized traffic lights, each only having two possible actions: red and green. The set of atomic propositions is $AP = \{red_1, green_1, red_2, green_2\}$.
+	
+	Consider the LT property: $P=$ "The first traffic light is infinitely often green." This corresponds to the set of infinite words of the form $A_0A_1A_2...$, such that $green_1 \in A_i$ holds for infinitely many $i$. \\\\
+	Examples of such infinite words include:
+	\begin{itemize}
+		\item {$\{green_1\}\emptyset\{green_1\}\emptyset\{green_1\}\emptyset\{green_1\}\emptyset$$\dots$}
+		\item {$\{red_1,green_2\}\{green_1,red_2\}\{red_1,green_2\}\{green_1,red_2\}$$\dots$}
+	\end{itemize}
+	Examples of infinite words not included in $P$:
+	\begin{itemize}
+		\item {$\{red_1,green_1\}\{red_1,green_1\}\emptyset\emptyset\emptyset$$\dots$ -- it contains finitely many occurrences of $green_1$}
+		\item {$\{red_1,red_2\}\{red_1,red_2\}\{red_1,red_2\}$$\dots$ -- it contains no occurrences of $green_1$}
+	\end{itemize}
+
+	Naturally, finite words do not satisfy $P$ -- by definition, they never satisfy LT properties.
+
+	It is easy to see, that both the model of the first controller (Figure \ref{fig:trafficLTS_1}) and the product controller (Figure \ref{fig:trafficLTS_3}) satisfy $P$.
+\end{example}
+
+\begin{figure}[!ht]
+	\centering
+	\begin{subfigure}[b]{0.2\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+			\node[state, initial] (q_0)   {$q0$}; 
+			\node[state] (q_1) [below=of q_0] {$q1$}; 
+			
+			\path[->] 
+			(q_0) edge [bend left=25] node {$red_1$} (q_1)
+			(q_1) edge [bend left=25] node {$green_1$} (q_0);
+		\end{tikzpicture}
+		\caption{1st controller}
+		\label{fig:trafficLTS_1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.2\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+			\node[state, initial] (q_2) [right=5cm of q_0] {$q0$}; 
+			\node[state](q_3) [below=of q_2] {$q1$};
+			
+			\path[->] 
+			(q_2) edge [bend left=25] node {$green_2$} (q_3)
+			(q_3) edge [bend left=25] node {$red_2$} (q_2);
+		\end{tikzpicture}
+		\caption{2nd controller}
+		\label{fig:trafficLTS_2}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+			\node[state, initial] (q_0)   {$ \langle q0,q0 \rangle $}; 
+			\node[state] (q_1) [below=of q_0] {$ \langle q1,q1 \rangle $}; 
+			
+			\path[->] 
+			(q_0) edge [bend left=45] node {$red_1$,$green_2$} (q_1)
+			(q_1) edge [bend left=45] node {$green_1$,$red_2$} (q_0);
+		\end{tikzpicture}
+		\caption{Product automaton}
+		\label{fig:trafficLTS_3}
+	\end{subfigure}
+	
+	\caption{A simplified model of two fully synchronized traffic lights based on \cite{principlesofmodelchecking}}
+	\label{fig:ltpropexample}
+\end{figure}
+
+Following the natural distinction between what a modeled system \textit{should} and what it \textit{should not} do, it is possible to introduce the terms \textit{safety} and \textit{liveness} properties.
+
+\begin{definition}[Safety Property]
+	An LT property $P_{safe}$ over $AP$ is called a \textit{safety} property iff for all words $\sigma \in (2^{AP})^\omega \backslash P_{safe}$ there exists a finite prefix $\hat{\sigma}$ of $\sigma$ such that $P_{safe} \cap \{\sigma' \in \sigma \in (2^{AP})^\omega | \hat{\sigma}$ is a finite prefix of $\sigma'\} = \emptyset$.
+	
+	In that case, $\hat{\sigma}$ is called a \textit{bad prefix}. A \textit{minimal bad prefix} is a bad prefix of minimal length.
+\end{definition}
+
+\begin{definition}[Liveness Property]
+	An LT property $P_{live}$ over $AP$ is called a \textit{liveness} property iff for all finite words $w \in (2^{AP})^*$ there exists an infinite word $\sigma \in (2^{AP})^\omega$ satisfying $w \sigma \in P$.
+\end{definition}
+
+\begin{theorem} 
+	The only LT property over $AP$ that is both a safety and a liveness property is $(2^{AP})^\omega$. \cite{principlesofmodelchecking}
+\end{theorem}
+
+\begin{theorem}
+	For any LT property $P$ over $AP$, there exists a safety property $P_{safe}$ and a liveness property $P_{live}$ such that $P = P_{safe} \cap P_{live}$. \cite{principlesofmodelchecking}
+\end{theorem}
+
+\begin{example}
+	\label{ex:safetyliveness}
+	Consider the property "the machine provides tea infinitely often after initially providing coffee three times in a row" regarding a vending machine. This can be decomposed into two parts.
+	
+	The first part -- "provides tea infinitely often" -- is a liveness property: any finite trace can be extendid such that the property holds.
+	
+	The second part -- "initially providing coffee three times in a row" -- is a safety property: any finite trace in which one of the first three drinks is tea (or generally, not coffee) violates it.
+\end{example}
+
+
+There is also a third aspect frequently mentioned in the literature: \textit{fairness} properties. These are assumptions that rule out infinite behaviors that are considered unrealistic, and are often necessary to establish liveness properties. However, they are out of the scope of this thesis and are not detailed further.
+
+The class of $\omega$-lanugages resulting from the above definition of LT properties is too general to handle. For simpler (i.e. decidable) processing and verification of these properties, we restrict the language of the properties to $\omega$-regular languages. We will see, that this is enough in most practical use-cases.
+
+\begin{definition}[$\omega$-Regular Properties]
+	An LT property $P$ over the set of atomic propositions $AP$ is called $\omega$-regular, if $P$ is an $\omega$-regular language over the alphabet $2^{AP}$.
+\end{definition}
+
+More complex constructs also exist in the literature, but these raise serious problems -- such as undecidability -- like context-free extensions introduced in \cite{temporallogics}. 
+	
+In the following subsection, we are going to introduce languages for the specification of different LT properties.
+
 
 \subsection{Linear-Time Temporal Logic}
-TODO
+Linear-Time Temporal Logic (LTL), also called Propositional Linear-Time Temporal Logic (PLTL) is the extension of propositional logic with temporal connectives over \textit{paths} of a \textit{base model}, e.g. an LTS. It is common to use definitions using Kripke-structures \cite{Kripke1963-KRISCO} as base models too, depending on the application. The syntax of LTL expressions over paths of LTSs is defined as follows:
+
+\begin{definition}[Syntax of LTL Expressions \cite{majzikform}]
+	Let $\pi = (s_0, a_1, s_1, a_2, ... )$ be a path of an LTS. Then the valid LTL expressions can be derived using the following production rules:
+	\begin{itemize}
+		\item $L_1$: if $a \in Act$, then $(a)$ is an LTL expression. 
+		\item $L_2$: if $p$ and $q$ are LTL expressions, then $p \land q$ and $\neg p$ are LTL expressions.
+		\item $L_3$: if $p$ and $q$ are LTL expressions, then $p U q$ and $X p$ are LTL expressions.
+	\end{itemize}
+	With the operator precedence: $\leftrightarrow$  <<  $\rightarrow$  << $\land$  <<  $\neg$  <<  $X, U$
+\end{definition}
+
+Additional operators can also be defined using the already defined ones:
+\begin{itemize}
+	\setlength\itemsep{0.2em}
+	\item $true$ holds for every state,
+	\item $false$ does not hold for any state,  
+	\item $p \lor q$ as $\neg((\neg p) \land (\neg q))$,
+	\item $p \rightarrow q$ as $(\neg p) \lor q$,
+	\item $p \leftrightarrow q$ as $(p \rightarrow q) \land (q \rightarrow p)$,
+	\item $F p$ as $true U p$,
+	\item $G p$ as $\neg F(\neg p)$,
+	\item $p WB q$ as $\neg((\neg p) U q)$,
+	\item $p B q$ as $\neg((\neg p) U q) \land F q$
+\end{itemize}
+
+%TODO modify (maybe to pomc def) so that the following statements are true
+The semantics of LTL expressions are defined as follows:
+\begin{definition}[Semantics of LTL Expressions\cite{majzikform}]
+	\label{def:ltlsemantics}
+	Let $\pi = (s_0, a_1, s_1, a_2, ... )$ be a path of an LTS model M. Then the formal semantics to the LTL expression P is given recursively, with regard to syntactic production rules as:
+	\begin{itemize}
+		\item $L_1$: $M,\pi \vDash (a) \leftrightarrow a_1 = a$ 
+		\item $L_2$: $M,\pi \vDash p \land q$ $\leftrightarrow$  $M,\pi \vDash p$ and  $M,\pi \vDash q$; \\
+		$M,\pi \vDash \neg q$ $\leftrightarrow$ not  $M,\pi \vDash q$
+		\item $L_3$: $M,\pi \vDash (p U q)$ $\leftrightarrow$  $\exists j \geq 0$ : $\pi^j \vDash q$ and $\forall 0 \leq k \leq j : \pi^k \vDash p$; \\
+		$M,\pi \vDash X p$ $\leftrightarrow$ $\pi^1 \vDash p$
+	\end{itemize}
+	Where $\vDash$ is te logical entailment operator, $M,\pi \vDash q$ denoting: for path $\pi$ of model $M$, $q$ holds.
+\end{definition}
+
+
+
+\begin{example}
+	\label{ex:ltlexample}
+	Based on these definitions, Figure \ref{fig:ltlexample} shows examples for the intuitive meanings of different LTL operators.
+\end{example}
+
+
+\begin{figure}[!ht]
+	\centering
+	\begin{subfigure}[b]{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+			\node[state] (s_1)   {}; 
+			\node[state] (s_2) [right=of s_1] {}; 
+			\node[state] (s_3) [right=of s_2] {}; 
+			\node[state](s_4) [right=of s_3] {};
+			\node[state](s_5) [right=of s_4] {};
+			\path[->] 
+			(s_1) edge  node {} (s_2)
+			(s_2) edge  node {} (s_3)
+			(s_3) edge  node {p} (s_4)
+			(s_4) edge  node {} (s_5);
+		\end{tikzpicture}
+		\caption{$F p$}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+			\node[state] (s_1)   {}; 
+			\node[state] (s_2) [right=of s_1] {}; 
+			\node[state] (s_3) [right=of s_2] {}; 
+			\node[state](s_4) [right=of s_3] {};
+			\node[state](s_5) [right=of s_4] {};
+			\path[->] 
+			(s_1) edge  node {p} (s_2)
+			(s_2) edge  node {p} (s_3)
+			(s_3) edge  node {p} (s_4)
+			(s_4) edge  node {p} (s_5);
+		\end{tikzpicture}
+		\caption{$G p$}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+			\node[state] (s_1)   {}; 
+			\node[state] (s_2) [right=of s_1] {}; 
+			\node[state] (s_3) [right=of s_2] {}; 
+			\node[state](s_4) [right=of s_3] {};
+			\node[state](s_5) [right=of s_4] {};
+			\path[->] 
+			(s_1) edge  node {} (s_2)
+			(s_2) edge  node {p} (s_3)
+			(s_3) edge  node {} (s_4)
+			(s_4) edge  node {} (s_5);
+		\end{tikzpicture}
+		\caption{$X p$}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto] 
+			\node[state] (s_1)   {}; 
+			\node[state] (s_2) [right=of s_1] {}; 
+			\node[state] (s_3) [right=of s_2] {}; 
+			\node[state](s_4) [right=of s_3] {};
+			\node[state](s_5) [right=of s_4] {};
+			\path[->] 
+			(s_1) edge  node {p} (s_2)
+			(s_2) edge  node {p} (s_3)
+			(s_3) edge  node {q} (s_4)
+			(s_4) edge  node {} (s_5);
+		\end{tikzpicture}
+		\caption{$p U q$}
+	\end{subfigure}
+	
+	\caption{Intuitive examples for the meanings of different LTL operators}
+	\label{fig:ltlexample}
+\end{figure}
+
+LTL expressions over paths of LTS models can be used to formulate requirements for systems interpretable as LTSs (such as Mealy machines) in a formalized way resembling conventional propositional logic -- which is widely used among engineers. LTL is a well-researched area of mathematics, and has an extensive tooling available for different purposes. One such application is the transformation to $\omega$-automata, which then can be executed parallel with the modeled system to verify its behavior.
+
+Definition \ref{def:ltlsemantics} introduced the semantics of LTL in such a way, that LTL expressions are clearly describing $\omega$-regular LT properties. On the other hand, LTL only possesses the expressive power to describe a proper subset of all $\omega$-regular languages \cite{firstorderdefinable}. This makes room for extensions and different property specification approaches, which are discussed in the following subsections.
 
 \subsection{Extensions of LTL}
 
