@@ -963,17 +963,17 @@ The split of an \textit{automaton} $A = (Q,2^{I \cup O}, \Delta, q_0, F)$ is the
 		(q_1) edge [bend left=40] node [left] {$\top$} (q_0)
 		(q_1) edge node {$\neg b$} (q_11)
 		(q_11) edge [bend left=40] node {$\neg a$} (q_12)
-		(q_12) edge [bend left=40] node [right] {$\neg b$ \{\textcolor{orange}{0}, \textcolor{cyan}{1}\}} (q_11)
+		(q_12) edge [bend left=40] node [above right, circle, fill=white, draw=cyan, thick] {\small \textcolor{cyan}{\textbf{1}}} node [below left, circle, fill=white, draw=orange, thick] {\small \textcolor{orange}{\textbf{0}}} node [right=0.5] {$\neg b$} (q_11)
 		(q_11) edge node [left] {$a$} (q_13)
 		(q_0) edge [bend left=40] node [left] {$a$} (q_2)
 		(q_2) edge [bend left=40] node [left] {$\top$} (q_0)
 		(q_2) edge node {$\top$} (q_21)
 		(q_21) edge [bend left=40] node [above] {$\neg a$} (q_22)
-		(q_22) edge node [right] {$\neg b$} (q_21)
-		(q_22) edge [bend left=40] node [right] {$b$ \{\textcolor{cyan}{1}\}} (q_21)
+		(q_22) edge node [left] {$\neg b$} (q_21)
+		(q_22) edge [bend left=40] node [below left=-0.5, circle, fill=white, draw=cyan, thick] {\small \textcolor{cyan}{\textbf{1}}} node [right=0.4] {$b$} (q_21)
 		(q_21) edge [bend left=40] node [right] {$a$} (q_23)
-		(q_23) edge [bend left=40] node {$b$ $\{\textcolor{orange}{0}, \textcolor{cyan}{1}\}$} (q_21)
-		(q_23) edge node [below] {$\neg b$ $\{\textcolor{orange}{0}\}$} (q_21)
+		(q_23) edge [bend left=40] node [below right=-0.1, circle, fill=white, draw=orange, thick] {\small \textcolor{orange}{\textbf{0}}} node [above left=0.1, circle, fill=white, draw=cyan, thick] {\small \textcolor{cyan}{\textbf{1}}} node [below left=0.1] {$b$} (q_21)
+		(q_23) edge node [below left=-0.35, circle, fill=white, draw=orange, thick] {\small \textcolor{orange}{\textbf{0}}} node [above=0.2] {$\neg b$} (q_21)
 		(q_1) edge [bend left=20] node {$b$} (q_21);
 	\end{tikzpicture}
 
