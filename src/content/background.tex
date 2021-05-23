@@ -1,7 +1,8 @@
 %----------------------------------------------------------------------------
 \chapter{Background}
 %----------------------------------------------------------------------------
-TODO TODO TODO
+%TODO review LTS "path" and "trace" everywhere
+TODO 
 
 \section{Model-Based Engineering}
 Due to the application of the modeling concept in several completely different domains, first of all, we need to define the meaning of \textit{model}.
@@ -243,6 +244,7 @@ An example of a deterministic Mealy machine can be seen in Example \ref{ex:coffe
 Another possible extension of finite automata is the acceptance of infinite input sequences. These automata are called $\omega$-$automata$, most of which are nondeterministic and differ only in their acceptance condition. The most notable kinds of $\omega$-automata are Büchi, Co-Büchi, Rabin, Streett, parity and Muller automata, some of which are defined here. 
 
 %TODO other ref, this one is only for Büchi
+%TODO transition-based definition: only that is important later
 \begin{definition}[$\omega$-Automaton \cite{majzikform}]
 	An $\omega$-automaton is a tuple $A=(S, s_0, \Sigma, \delta, F)$, where:
 	\begin{itemize}
@@ -425,7 +427,7 @@ The process of constructing automata uses the concept of partition refinement. I
 \end{definition} 
 
 \begin{definition}[exact k-distinguishability]
-	Two states, $s,s'\in S$ are exact k-distinguishable, denoted by $k^=$ iff s and s' are k-distinguishable, but not (k-1)-distinguishable
+	Two states, $s,s'\in S$ are exact k-distinguishable, denoted by $k^=$ iff s and s' are k-distinguishable, but not (k-1)-distinguishable.
 \end{definition}
 
 Essentially, if two states, s and s' are  k-distinguishable, then when processing the same input sequence, from some suffix of the word w with length at most k, they will produce differing outputs. Using this, we can observe, that whenever two states, $s_1, s_2\in S$ are (k+1)-distinguishable, then they each have a successor $s_1'$ and $s_2'$ reached by some $\alpha\in\Sigma$, such that $s_1'$ and $s_2'$ are k-distinguishable. These successors are called $\alpha$-successors. This suggests, that:
@@ -564,7 +566,7 @@ The DHC algorithm is a straightforward implementation of active automata learnin
 %TODO cite!!!
 The $L^*_M$ algorithm -- seen in Algorithm \ref{algo:lstar} -- is similar to the DHC algorithm, however, it maintains a global table containing the previously gathered information. Informally, the rows of the table correspond to states and state candidates of the hypothesis, and are labeled with a possible access sequence of the given state (candidate). The columns of the table correspond to the suffixes of the access sequence containing separating behavior. Thus, the fields of the table are the results of $mq(prefix + suffix)$. The fields are indexed with $Obs(prefix, suffix)$.
 
-More precisely, the rows are divided into two disjoint sets: $S_p$ contains unique rows, which correspond to the states during the hypothesis construction. $L_p$ contains rows, which are labeled with the labels of $S_p$ + an element from the input alphabet -- i.e. the continuation of the access sequences of $S_p.
+More precisely, the rows are divided into two disjoint sets: $S_p$ contains unique rows, which correspond to the states during the hypothesis construction. $L_p$ contains rows, which are labeled with the labels of $S_p$ + an element from the input alphabet -- i.e. the continuation of the access sequences of $S_p$.
 
 Before each hypothesis construction, the consistency and closedness of the table must be ensured. This means, that $S_p$ must only contain unique rows, and each row in $L_p$ must have a corresponding row in $S_p$ with the same elements. This can be reached by iteratively adding unique rows of $L_p$ to $S_p$ and adding their continuations to $L_p$. 
 
@@ -596,8 +598,9 @@ This algorithm results in a canonical automaton of the learned system, but does 
 
 The $L^*_M$ algorithm is more refined implementation of automata learning than the DHC algorithm. Let $n$ denote the number of states in the final hypothesis and $k$ the size of the input alphabet. The algorithm terminates after at most $n^2k + k^2n + nlog(m)$ membership queries, the first two terms resulting from the maximum size of the table and the last term as a result of processing the equivalence queries. It also asks at most $n$ equivalence queries. Also, all computation that is required on the table and the construction of hypothesis models is polynomial in the size of the final observation table, which contains maximum $n^2k + k^2n$ elements.
 
-\subsection{Advanced Approaches (better ones / variants / etc)}
-PLACEHOLDER
+\subsection{Advanced Approaches}
+%TODO placeholder (better ones, variants, etc)
+TODO
 
 \section{Specifying Complex Requirements}
 The previous sections introduced different modeling types and techniques. We now discuss the requirements used in model-based engineering which the models need to satisfy.
@@ -628,7 +631,6 @@ The rationale behind the precise formalization is the wide range of automated ap
 
 LT properties can be used to describe restictions on the traces of transition systems, such as LTSs (introduced in Subsection \ref{ss:automata}) or Kripke-structures \cite{Kripke1963-KRISCO}.
 
-%TODO define trace for LTS?
 \begin{definition}[Satisfaction of LT Properties]
 	\label{def:ltsatisfaction}
 	Let $TS = (S, Act, \rightarrow)$ be a (labeled) transition system, $AP = Act$ the set of atomic propositions and $P$ an LT property over $AP$. $TS$ satisfies $P$ -- denoted $TS \vDash P$ -- iff $Traces(TS) \subseteq P$.
@@ -740,6 +742,7 @@ There is also a third aspect frequently mentioned in the literature: \textit{fai
 The class of $\omega$-lanugages resulting from the above definition of LT properties is too general to handle. For simpler (i.e. decidable) processing and verification of these properties, we restrict the language of the properties to $\omega$-regular languages. We will see, that this is enough in most practical use-cases.
 
 \begin{definition}[$\omega$-Regular Properties]
+	\label{def:omegaregprop}
 	An LT property $P$ over the set of atomic propositions $AP$ is called $\omega$-regular, if $P$ is an $\omega$-regular language over the alphabet $2^{AP}$.
 \end{definition}
 
@@ -751,7 +754,7 @@ In the following subsection, we are going to introduce languages for the specifi
 \subsection{Linear-Time Temporal Logic}
 Linear-Time Temporal Logic (LTL), also called Propositional Linear-Time Temporal Logic (PLTL) is the extension of propositional logic with temporal connectives over \textit{paths} of a \textit{base model}, e.g. an LTS. It is common to use definitions using Kripke-structures \cite{Kripke1963-KRISCO} as base models too, depending on the application. The syntax of LTL expressions over paths of LTSs is defined as follows:
 
-\begin{definition}[Syntax of LTL Expressions \cite{majzikform}]
+\begin{definition}[Syntax of LTL Expressions]
 	Let $\pi = (s_0, a_1, s_1, a_2, ... )$ be a path of an LTS. Then the valid LTL expressions can be derived using the following production rules:
 	\begin{itemize}
 		\item $L_1$: if $a \in Act$, then $(a)$ is an LTL expression. 
@@ -775,11 +778,10 @@ Additional operators can also be defined using the already defined ones:
 	\item $p B q$ as $\neg((\neg p) U q) \land F q$
 \end{itemize}
 
-%TODO modify (maybe to pomc def) so that the following statements are true
 The semantics of LTL expressions are defined as follows:
-\begin{definition}[Semantics of LTL Expressions\cite{majzikform}]
+\begin{definition}[Semantics of LTL Expressions]
 	\label{def:ltlsemantics}
-	Let $\pi = (s_0, a_1, s_1, a_2, ... )$ be a path of an LTS model M. Then the formal semantics to the LTL expression P is given recursively, with regard to syntactic production rules as:
+	Let $\pi = (s_0, a_1, s_1, a_2, ... )$ be a trace of an LTS model $M=(S, Act, \rightarrow)$. Then the formal semantics to the LTL expressions $a$, $p$ and $q$ is given recursively, with regard to syntactic production rules as:
 	\begin{itemize}
 		\item $L_1$: $M,\pi \vDash (a) \leftrightarrow a_1 = a$ 
 		\item $L_2$: $M,\pi \vDash p \land q$ $\leftrightarrow$  $M,\pi \vDash p$ and  $M,\pi \vDash q$; \\
@@ -787,16 +789,14 @@ The semantics of LTL expressions are defined as follows:
 		\item $L_3$: $M,\pi \vDash (p U q)$ $\leftrightarrow$  $\exists j \geq 0$ : $\pi^j \vDash q$ and $\forall 0 \leq k \leq j : \pi^k \vDash p$; \\
 		$M,\pi \vDash X p$ $\leftrightarrow$ $\pi^1 \vDash p$
 	\end{itemize}
-	Where $\vDash$ is te logical entailment operator, $M,\pi \vDash q$ denoting: for path $\pi$ of model $M$, $q$ holds.
+	Where $\vDash$ is the logical entailment operator, $M,\pi \vDash q$ denoting: for trace $\pi$ of model $M$, $q$ holds.
+	
 \end{definition}
-
-
 
 \begin{example}
 	\label{ex:ltlexample}
 	Based on these definitions, Figure \ref{fig:ltlexample} shows examples for the intuitive meanings of different LTL operators.
 \end{example}
-
 
 \begin{figure}[!ht]
 	\centering
@@ -871,23 +871,226 @@ The semantics of LTL expressions are defined as follows:
 	\label{fig:ltlexample}
 \end{figure}
 
-LTL expressions over paths of LTS models can be used to formulate requirements for systems interpretable as LTSs (such as Mealy machines) in a formalized way resembling conventional propositional logic -- which is widely used among engineers. LTL is a well-researched area of mathematics, and has an extensive tooling available for different purposes. One such application is the transformation to $\omega$-automata, which then can be executed parallel with the modeled system to verify its behavior.
+LTL expressions over paths of LTS models can be used to formulate requirements for any system interpretable as LTSs (such as Mealy machines) in a formalized way resembling conventional propositional logic -- which is widely used among engineers. LTL is a well-researched area of mathematics, and has an extensive tooling available for different purposes. One such application is the transformation to $\omega$-automata, which then can be executed parallel with the modeled system to verify its behavior.
 
-Definition \ref{def:ltlsemantics} introduced the semantics of LTL in such a way, that LTL expressions are clearly describing $\omega$-regular LT properties. On the other hand, LTL only possesses the expressive power to describe a proper subset of all $\omega$-regular languages \cite{firstorderdefinable}. This makes room for extensions and different property specification approaches, which are discussed in the following subsections.
+\begin{example}
+	\label{ex:ltlbuchi}
+	Figure \ref{fig:ltlToBuchi} shows a possible transition-based Generalized Büchi Automaton corresponding the LTL specification $(GFa) \leftrightarrow (GFb)$. A run is accepting if it visits both edges marked with \textcolor{orange}{0} and \textcolor{cyan}{1} infinitely often.
+\end{example}
+
+\begin{figure}[!ht]
+	\centering
+	\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+		\node[state, initial] (q_0)   {$0$}; 
+		\node[state] (q_1) [above right=of q_0] {$1$}; 
+		\node[state] (q_2) [below right=of q_0] {$2$};
+		
+		\path[->] 
+		(q_0) edge [loop above] node {$\top$} (q_0)
+		(q_0) edge node [below right] {$\neg a \neg b$} (q_1)
+		(q_1) edge [loop right] node [below right] {$\neg a \neg b$} node [above right] {\{\textcolor{orange}{0}, \textcolor{cyan}{1}\}} (q_1)
+		(q_0) edge node [left] {$a \lor b$} (q_2)
+		(q_2) edge [loop above] node [above left] {$a b$} node [above right] {\{\textcolor{orange}{0}, \textcolor{cyan}{1}\}} (q_2)
+		(q_2) edge [loop right] node [below right] {$a \neg b$} node [above right] {\{\textcolor{orange}{0}\}} (q_2)
+		(q_2) edge [loop below] node {$\neg a \neg b$} (q_2)
+		(q_2) edge [loop left] node [below left] {$\neg a b$} node [above left] {\{\textcolor{cyan}{1}\}} (q_2);
+	\end{tikzpicture}
+	\caption{A transition-based GBA for the specification $(GFa) \leftrightarrow (GFb)$}
+	\label{fig:ltlToBuchi}
+\end{figure}
+
+Based on Definition \ref{def:ltlsemantics}, it can be shown that LTL expressions are only capable of describing $\omega$-regular LT properties. On the other hand, LTL only possesses the expressive power to describe a proper subset of all $\omega$-regular languages \cite{firstorderdefinable}. This makes room for extensions and different property specification approaches, which are discussed in the following subsections.
 
 \subsection{Extensions of LTL}
 
+TODO
+
 \section{Reactive Synthesis from Temporal Logic}
-TODO TODO TODO
+
+The previous section defined requirements and properties. A straightforward way of utilizing these requirements in connection with automata learning is to transform them to its targeted formalism -- a Mealy automaton. Luckily, model synthesis from $\omega$-regular LT properties is a well-researched area with an extensive literature. In this section, we are going to introduce the most common synthesis techniques from such properties to Mealy automata. 
+
+%TODO insert reference(s) to definition(s)
+From the definition of $\omega$-regular properties follows, that an $\omega$-automaton must exist for each $\omega$-regular property. We have also seen, that several formalisms exist for the formulation of $\omega$-regular properties, each fit for a different subset of these properties. Thus, we are only going to discuss the problem of finding an appropriate controller -- in this case a Mealy machine -- for a given $\omega$-automaton.  
 
 \subsection{Synthesis Problem for Reactive Systems}
-TODO
+Formally, an instance of the \textit{reactive synthesis problem} is a triple $(I,O,L)$, where $I$ and $O$ are two disjoint sets of input and output events (words) respectively, and $L$ is an $\omega$-regular language over the alphabet $2^{I \cup O}$ -- given as an $\omega$-automaton. 
+
+A \textit{controller} is a function $C : (2^{I \cup O})^* \times 2^I \rightarrowtail 2^O$. An infinite word $u = u_0 u_1 u_2 \dots \in (2^{I \cup O})^\omega$ is \textit{consistent} with controller C if, for every $n \in \mathbb{N}, u_n \cap O = C(u_0, \dots, u_n \cap I)$. A controller $C$ is said to \textit{enforce} $L$ if every infinite word consistent with $C$ is in $L$. Given $I$, $O$ and $L$, the reactive synthesis problem asks, whether there exists a controller enforcing $L$, and asks for a witness if the answer is positive. \cite{ltlsynt}
+
+From this triple-based definition of the reactive synthesis problem, game theory and the formal definition of games is a natural association.
 
 \subsection{Games and Reactive Systems}
-TODO
 
-\subsection{Bounded Synthesis through Safety Games}
-TODO
+A \textit{game} is an $\omega$-automaton, where the set of states $Q$ is partitioned into two sets $Q_A$ and $Q_B$ for two players $A$ and $B$. We refer to the underlying automaton (seen as an automaton and not as a game) as its \textit{arena}. Runs of the arena are called \textit{plays} in the game setting. By convention, the acceptance condition of the arena is the winning condition for the second player ($B$) in the game: a play is won by B if and only if it is accepting in the arena. Otherwise, the play is won by A (in particular, finite plays are won by A). It is also convenient to partition $\Sigma$ into $\Sigma_A$ (letters played by A) and $\Sigma_B$ (letters played by B). This restricts $\Delta$ (the transition relation) of the $\omega$-automaton so that transitions from $Q_A$ and $Q_B$ are labelled with letters from $\Sigma_A$ and  $\Sigma_B$ respectively.
+
+A \textit{strategy} for A (resp. B) is a function mapping finite plays ending in $Q_A$ (resp. $Q_B$) to a valid transition extending the play. Given a strategy $\sigma$ for A (resp. B), a $\sigma$-play is a (finite or infinite) play $\rho$ where every transition taken by A (resp. B), say at position i, is given by $\sigma ( \rho_0 \dots \rho_i)$. A \textit{positional} (or \textit{memoryless}) strategy is a strategy whose value depends only on the state in which the given run ends. Given one strategy for each player, say $\sigma_A$ and $\sigma_B$, there is a unique longest play that is both a $\sigma_A$-play and a $\sigma_B$-play, which is called the outcome of $\sigma_A$ and $\sigma_B$. A winning strategy for a player is a strategy that makes that player win its outcome against every strategy for the other player. A game is \textit{turn-based} if $\Delta$ alternates between $Q_A$ and $Q_B$ (i.e. no player plays twice in a row).
+
+It is now clear, that the thus defined games and the reactive synthesis problem are closely related -- just swap the players A and B to the I and O of the synthesis problem -- and the old and well-researched game-theory can be applied to efficiently solve it.
+
+In fact, most state-of-the-art approaches -- such as LTLSYNT \cite{ltlsynt} and STRIX \cite{strix} -- use parity-game solving for model synthesis, which we discuss next.
+%\subsection{Bounded Synthesis through Safety Games}
 
 \subsection{Synthesis through Parity Games}
-TODO
+
+The $\omega$-automata, based on which the controller is constructed, does not necessarily separate input and output symbols. This results in smaller automata -- perfect for verification -- that are hard to utilize in model synthesis. Thus, we need to define a corresponding intermediate formalism, which takes this into consideration.
+
+\begin{definition} [Split Word, Language, Automaton]
+Let a \textit{word} $u = (u_i)_{i \in \mathbb{N}} \in (2^{I \cup O})^\omega$. We define $split_{I,O}(u) = (v_i)_{i \in \mathbb{N}} \in (2^I 2^O)^\omega$ as follows: for all $i \in \mathbb{N}$, $v_{2i} = u_i \cap I$ and $v_{2i+1} = ui \cap O$. This operation naturally extends to \textit{languages}: $split_{I,O}(L) = \{split_{I,O}(u) | u \in L \}$.
+
+The split of an \textit{automaton} $A = (Q,2^{I \cup O}, \Delta, q_0, F)$ is the automaton, noted $split_{I,O}(A)$, $(Q \cup Q \times 2^I, 2^{I \cup O},\Delta_s,q_0,F)$ where each transition $(q,a,f,q_0) \in \Delta$ gives, for each $i \in a \cap 2^I$, two transitions in $\Delta_s$: $(q,i,\emptyset,(q,i))$ and $((q,i),a \cap 2^O,f,q')$.
+\end{definition}
+
+\begin{example}
+	\label{ex:splitexample}
+	Figure \ref{fig:splitexample} shows an example of a split automaton for the Büchi-automaton of Example \ref{ex:ltlbuchi}. Notice, how the splitting separates the edges to ones containing only input symbols and those containing only output symbols. Also note, that the split automaton is nondeterministic and exhibits the acceptance condition of the original automaton: the transition-based generalized Büchi condition.
+\end{example}
+
+\begin{figure}[!ht]
+	\centering
+	\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+		\node[state, initial] (q_0)   {$0$}; 
+		\node[state] (q_1) [above=of q_0] {$3,\neg a$};
+		\node[state] (q_11) [right=of q_1] {$2$};
+		\node[state] (q_12) [above right=of q_11] {$2,\neg a$};
+		\node[state] (q_13) [below right=of q_11] {$2, a$};   
+		\node[state] (q_2) [below=of q_0] {$3, a$};
+		\node[state] (q_21) [right=of q_2] {$1$};
+		\node[state] (q_22) [above right=of q_21] {$1, \neg a$};
+		\node[state] (q_23) [below right=of q_21] {$1, a$};
+		
+		\path[->] 
+		(q_0) edge [bend left=40] node [left] {$\neg a$} (q_1)
+		(q_1) edge [bend left=40] node [left] {$\top$} (q_0)
+		(q_1) edge node {$\neg b$} (q_11)
+		(q_11) edge [bend left=40] node {$\neg a$} (q_12)
+		(q_12) edge [bend left=40] node [right] {$\neg b$ \{\textcolor{orange}{0}, \textcolor{cyan}{1}\}} (q_11)
+		(q_11) edge node [left] {$a$} (q_13)
+		(q_0) edge [bend left=40] node [left] {$a$} (q_2)
+		(q_2) edge [bend left=40] node [left] {$\top$} (q_0)
+		(q_2) edge node {$\top$} (q_21)
+		(q_21) edge [bend left=40] node [above] {$\neg a$} (q_22)
+		(q_22) edge node [right] {$\neg b$} (q_21)
+		(q_22) edge [bend left=40] node [right] {$b$ \{\textcolor{cyan}{1}\}} (q_21)
+		(q_21) edge [bend left=40] node [right] {$a$} (q_23)
+		(q_23) edge [bend left=40] node {$b$ $\{\textcolor{orange}{0}, \textcolor{cyan}{1}\}$} (q_21)
+		(q_23) edge node [below] {$\neg b$ $\{\textcolor{orange}{0}\}$} (q_21)
+		(q_1) edge [bend left=20] node {$b$} (q_21);
+	\end{tikzpicture}
+
+	\caption{Split automaton of the automaton from Figure \ref{fig:ltlToBuchi} based on \cite{ltlsynt}.}
+	\label{fig:splitexample}
+\end{figure}
+
+For the construction of an appropriate controller, the following two theorems give clues. For the proofs, we refer the reader to \cite{ltlsynt}.
+
+\begin{theorem}
+	Let $G$ be a game whose arena is complete and deterministic for player $A$ and that recognizes $split_{I,O}(L)$. If player $B$ wins $G$, then there is a controller enforcing $L$.
+\end{theorem}
+\begin{theorem}
+	Let $G$ be a game whose arena is complete for $A$, deterministic (for both players) and recognizes the language $split_{I,O}(L)$. If there is a controller enforcing $L$, then $B$ wins the game $G$.
+\end{theorem}
+
+Note, that both theorems require the arena of the game to be deterministic, and no algorithms are known for the nondeterministic case. This restricts the applicability of certain $\omega$-automata, as, e.g. deterministic Büchi-automata are strictly less expressive than their nondeterministic counterparts. Thus, most approaches use deterministic parity automata (DPA) as the arena of the games to solve. Deterministic and nondeterministic parity automata are equally able to express all $\omega$-regular languages and they also have a natural association to turn-based games. Thus, the next step of these synthesis algorithms is the determinization of the input $\omega$-automata by applying a transformation to a DPA. A possible algorithm for the transformation of transition-based Büchi-automata to transition-based DPA is that of Redziejowski \cite{redziejowski}.
+
+This is followed by the solution of the parity game. An appropriate algorithm is Zielonka's recursive algorithm \cite{zielonka}, with the time complexity of $O(n^d)$, where $d$ is the number of different priorities in the game. There are other, quasi-polinomial algorithms too, which can be applied with little improvement in most practical cases.
+
+\begin{example}
+	\label{ex:paritygameexample}
+	Figure \ref{fig:paritygameexample} shows a parity game constructed from the automaton in Example \ref{ex:splitexample} -- with a deterministic parity automaton as its arena. The diamond nodes belong to Player A -- the environment player -- and the circular nodes belong to player B -- the system player. Player B wins, if the minimum priority encountered infinitely often is odd. 
+	
+	The solution is also shown: the highlighted nodes and transitions are in the winning strategy, while the grey elements are unreachable.
+\end{example}
+
+\begin{figure}[!ht]
+	\centering
+	\begin{tikzpicture}[shorten >=1pt,node distance=1.5cm,on grid,auto] 
+		% INITIAL
+		\node[diamond, draw, initial] (q_0)   {$$}; 
+		% RIGHT OF THE INITIAL
+		\node[circle, draw] (q_11) [above right=of q_0] {$$};
+		\node[diamond, draw, gray] (q_12) [right=of q_0]   {$$}; 
+		\node[circle, draw] (q_13) [below right=of q_0] {$$};
+		\node[circle, draw, gray] (q_14) [right=of q_12] {$$};
+		% FIRST BOTTLENECK 
+		\node[diamond, draw] (q_2) [right=of q_14]   {$$};
+		% RIGHT OF THE FIRST BOTTLENECK
+		\node[circle, draw] (q_31) [above right=of q_2] {$$};
+		\node[diamond, draw] (q_32) [right=of q_2]   {$$};
+		\node[circle, draw] (q_33) [below right=of q_2] {$$};
+		\node[circle, draw] (q_34) [right=of q_32] {$$};
+		% SECOND BOTTLENECK
+		\node[diamond, draw, gray] (q_4) [right=of q_34]   {$$};
+		% RIGHT OF THE SECOND BOTTLENECK
+		\node[circle, draw, gray] (q_51) [right=of q_4] {$$};
+		\node[diamond, draw, gray] (q_52) [above=of q_51]   {$$};
+		\node[circle, draw, gray] (q_53) [right=of q_51] {$$};
+		
+		\path[->] 
+		% FIRST BLOCK (INIT <-> FIRST BOTTLENECK)
+		(q_0) edge [bend left=40] node [left] {$\neg a$} (q_11)
+		(q_11) edge [gray] node [left] {$\neg b$} (q_12)
+		(q_12) edge [gray] node [left] {$a$ $\{0\}$} (q_13)
+		(q_0) edge [bend right=40] node [left] {$a$} (q_13)
+		(q_12) edge [bend left=40, gray] node [above] {$\neg a$ $\{1\}$} (q_14)
+		(q_14) edge [bend left=40, gray] node [below] {$\neg b$ $\{1\}$} (q_12)
+		(q_14) edge [gray] node [below] {$b$ $\{0\}$} (q_2)
+		(q_11) edge [bend left=40] node [above] {$b$} (q_2)
+		(q_13) edge [bend right=40] node [below] {$\top$} (q_2)
+		% SECOND BLOCK (FIRST <-> SECOND BOTTLENECK)
+		(q_2) edge [bend left=40] node [above] {$a$} (q_31)
+		(q_31) edge [gray] node [above] {$\neg b$} node [left=-0.3cm] {$\{2\}$} (q_2)
+		(q_31) edge [bend left=40] node [below] {$b$$\{1\}$} (q_2)
+		(q_2) edge [bend right=40] node [below] {$\neg a$} (q_33)
+		(q_33) edge node [right] {$\neg b$} (q_32)
+		(q_32) edge node [right=-0.4cm] {$a$ $\{2\}$} (q_31)
+		(q_32) edge [bend left=40] node [above] {$\neg a$ $\{3\}$} (q_34)
+		(q_34) edge [bend left=40] node [below] {$\neg b$ $\{3\}$} (q_32)
+		(q_34) edge [gray] node [below] {$b$ $\{2\}$} (q_4)
+		(q_4) edge [bend right=40, gray] node [above] {$a$ $\{1\}$} (q_31)
+		(q_33) edge [bend right=40, gray] node [below] {$b$} (q_4)
+		% THIRD BLOCK (SECOND -> ETC)
+		(q_4) edge [bend left=40, gray] node [above] {$\neg a$} (q_51)
+		(q_51) edge [bend left=40, gray] node [above] {$b$ $\{2\}$} (q_4)
+		(q_51) edge [gray] node [left] {$\neg b$} (q_52)
+		(q_52) edge [bend right=40, gray] node [above] {$a$ $\{1\}$} (q_31)
+		(q_52) edge [bend left=40, gray] node [above] {$\neg a$ $\{3\}$} (q_53)
+		(q_53) edge [bend left=40, gray] node [above] {$\neg b$ $\{3\}$} (q_52)
+		(q_53) edge [bend left=40, gray] node [below] {$b$ $\{2\}$} (q_4)
+		;
+	\end{tikzpicture}
+	
+	\caption{Parity game from the automaton on Figure \ref{fig:splitexample} based on \cite{ltlsynt}.}
+	\label{fig:paritygameexample}
+\end{figure}
+
+When Player B has a winning strategy $\sigma$ from the initial state, we can extract a controller from $\sigma$ that ensures realisation of the specification. It corresponds to an incompletely specified Mealy machine, where some outputs might not be specified and could be instantiated either way. This enables more compact representations and retains the possiblities in the implementations.
+
+Let $(V_A , V_B, E)$ be the parity game arena where B wins from the initial state with the strategy $\sigma$. We can use $Q = \{q \in V_A |$ Player B wins the game applying the strategy $\sigma\}$ as the set of states. For the transition function, let $\delta(q, i) := q′$ by choosing some $q′$ where $((q, I), O, q') \in \sigma$ for some $I \subseteq \Sigma_{in}$ with $i \in I$ and any $O \subseteq \Sigma_{out}$. By construction, and as $\sigma$ is a winning strategy for all $q \in Q$, such a $q′$ always exists. However, there may be multiple applicable $q′$. This may result in several possible -- not necessarily minimal -- controllers. For the output function, let $\delta(q,i) = q'$ be an edge of the Mealy machine. Then, let $\lambda(q,i) = \{o$ | $\exists I,O : i \in I$ and $o \in O$ and $((q,I),O,q) \in \sigma\}$ -- a Boolean formula encoding all the possible corresponding outputs in a nondeterministic way.
+
+\begin{example}
+	Figure \ref{fig:synthmealyexample} shows a Mealy automaton constructed from the winning strategy of the parity game in Example \ref{ex:paritygameexample}.
+	
+	Note, that the automaton is nondeterministic -- not fully specified -- and non-minimal -- $q_1$ and $q_2$ could be merged.
+\end{example}
+
+\begin{figure}[!ht]
+	\centering
+	\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto] 
+		\node[state, initial] (0)  {$q_0$}; 
+		\node[state] (1) [right of=0] {$q_1$}; 
+		\node[state] (2) [right of=1] {$q_2$}; 
+				
+		\path[->] 
+		(0) edge [bend left=40] node [above] {$\neg a / b$} (1)
+		(0) edge [bend right=40] node [below] {$a / \Sigma_{out}$} (1)
+		(1) edge [loop above] node [above] {$a / b$} (1)
+		(1) edge [bend left=40] node [above] {$\neg a / \neg b$} (2)
+		(2) edge [bend left=40] node [below] {$a / b$} (1)
+		(2) edge [loop above] node [above] {$\neg a / \neg b$} (2)
+		;
+	\end{tikzpicture}
+	
+	\caption{Mealy machine from the parity game on Figure \ref{fig:paritygameexample}.}
+	\label{fig:synthmealyexample}
+\end{figure}
+
